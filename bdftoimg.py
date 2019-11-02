@@ -20,6 +20,7 @@ def jisx0208_to_shiftjis(code):
 if __name__ == '__main__':
     parser = OptionParser(usage="Usage: %prog <filename> <outputfile> [--jis-to-sjis]")
     parser.add_option('--jis-to-sjis', action='store_true', dest='jis_to_sjis', default=False, help="convert encoding from JIS to SJIS")
+    parser.add_option('--offset', dest='offset', default=0, help="Add character offsets to output image.")
     (options, args) = parser.parse_args()
     if len(args) != 2:
         sys.stderr.write("Input and output files must be specified.\n")
@@ -62,7 +63,7 @@ if __name__ == '__main__':
     result = OrderedDict(sorted(result.items())).items()
     resultIter = iter(result)
     current = next(resultIter)
-    first = current[0]
+    first = current[0] - int(options.offset)
     rows = ceil((next(reversed(result))[0] - first) / 16)
     image = Image.new('L', (maxSize[0] * 16, maxSize[1] * rows))
     try:
