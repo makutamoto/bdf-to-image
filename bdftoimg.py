@@ -35,7 +35,7 @@ if __name__ == '__main__':
         sys.stderr.write("Could not open '%s'." % args[0])
 
     syntax = "FONT_{}\n{}"
-    clauseRegex = re.compile(r'STARTCHAR\s+([\w\d]+)(?s:.+?)BBX\s+(\d+)\s+(\d+)\s+(-*\d+)\s+(-*\d+)\s*\nBITMAP\s*\n((?s:.+?))\nENDCHAR\n')
+    clauseRegex = re.compile(r'STARTCHAR(?s:.+?)ENCODING\s+(\d+)(?s:.+?)BBX\s+(\d+)\s+(\d+)\s+(-*\d+)\s+(-*\d+)\s*\nBITMAP\s*\n((?s:.*?))\n?ENDCHAR\n')
     result = {}
     maxSize = (0, 0)
     for char in clauseRegex.finditer(inputData):
@@ -44,6 +44,8 @@ if __name__ == '__main__':
         size = (int(char.group(2)), int(char.group(3)))
         maxSize = (max(size[0], maxSize[0]), max(size[1], maxSize[1]))
         bitmap = char.group(6).split('\n')
+        if bitmap == ['']:
+            continue
         for line in bitmap:
             bitwidth = len(line) * 4
             bin = int(line, 16)
@@ -55,7 +57,7 @@ if __name__ == '__main__':
                 else:
                     image.append(0)
                 bin = bin << 1
-        code = int(encoding, base=16)
+        code = int(encoding)
         if options.jis_to_sjis:
             code = jisx0208_to_shiftjis(code)
         result[code] = Image.frombytes('L', size, bytes(image))
